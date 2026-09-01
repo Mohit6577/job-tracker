@@ -1,6 +1,8 @@
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import Job from './models/Job.js';
+import User from './models/User.js';
+import bcrypt from 'bcrypt';
 
 dotenv.config();
 
@@ -377,10 +379,26 @@ const seedDatabase = async () => {
 
     console.log('MongoDB connected');
 
+    const password = await bcrypt.hash('Test1234', 10);
+
+    let user = await User.findOne({ email: 'seed@example.com' });
+
+    if (!user) {
+      user = await User.create({
+        email: 'seed@example.com',
+        password,
+      });
+    }
+
+    const jobsWithUser = jobs.map((job) => ({
+      ...job,
+      user: user._id,
+    }));
+
     await Job.deleteMany({});
     console.log('Old jobs deleted');
 
-    await Job.insertMany(jobs);
+    await Job.insertMany(jobsWithUser);
     console.log(`${jobs.length} jobs inserted`);
 
     await mongoose.connection.close();

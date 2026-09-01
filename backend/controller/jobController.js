@@ -2,7 +2,7 @@ import Job from '../models/Job.js';
 
 const createJob = async (req, res, next) => {
   try {
-    const job = new Job(req.body);
+    const job = new Job({ ...req.body, user: req.user.userId });
 
     await job.save();
 
@@ -17,7 +17,7 @@ const getJobs = async (req, res, next) => {
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 5;
     const skip = (page - 1) * limit;
-    const filter = {};
+    const filter = { user: req.user.userId };
     const status = req.query.status?.trim();
     const search = req.query.search?.trim();
     const sortQuery = req.query.sort || '-createdAt';

@@ -8,9 +8,10 @@ import {
   deleteJob,
 } from '../controller/jobController.js';
 import validateCreateJob from '../middleware/validateJob.js';
+import authMiddleware from '../middleware/authMiddleware.js';
 
-router.post('/', validateCreateJob, createJob);
-router.get('/', getJobs);
+router.post('/', authMiddleware, validateCreateJob, createJob);
+router.get('/', authMiddleware, getJobs);
 router.get('/:id', getJob);
 router.patch('/:id', updateJob);
 router.delete('/:id', deleteJob);

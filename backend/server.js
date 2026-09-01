@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import express from 'express';
 import jobRoutes from './routes/jobRoutes.js';
+import authRoutes from './routes/authRoutes.js';
 import errorMiddleware from './middleware/errorMiddleware.js';
 
 dotenv.config();
@@ -10,6 +11,7 @@ const PORT = process.env.PORT || 5000;
 
 app.use(express.json());
 app.use('/api/jobs', jobRoutes);
+app.use('/api/auth', authRoutes);
 app.use(errorMiddleware);
 
 mongoose

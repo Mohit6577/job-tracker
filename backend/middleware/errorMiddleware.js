@@ -1,5 +1,3 @@
-import { success } from 'zod';
-
 const errorMiddleware = (err, req, res, next) => {
   if (err.name === 'CastError') {
     return res.status(400).json({
@@ -29,7 +27,7 @@ const errorMiddleware = (err, req, res, next) => {
 
   res.status(500).json({
     success: false,
-    message: err.name,
+    message: err.message,
   });
 };
 
