@@ -1,4 +1,6 @@
+import { success } from 'zod';
 import Job from '../models/Job.js';
+import mongoose from 'mongoose';
 
 const createJob = async (req, res, next) => {
   try {
@@ -14,8 +16,8 @@ const createJob = async (req, res, next) => {
 
 const getJobs = async (req, res, next) => {
   try {
-    const page = Number(req.query.page) || 1;
-    const limit = Number(req.query.limit) || 5;
+    const page = Math.max(Number(req.query.page) || 1, 1);
+    const limit = Math.min(Math.max(Number(req.query.limit) || 5, 1), 100);
     const skip = (page - 1) * limit;
     const filter = { user: req.user.userId };
     const status = req.query.status?.trim();
@@ -76,7 +78,10 @@ const getJobs = async (req, res, next) => {
 
 const getJob = async (req, res, next) => {
   try {
-    const job = await Job.findById(req.params.id);
+    const job = await Job.findOne({
+      _id: req.params.id,
+      user: req.user.userId,
+    });
     if (!job) {
       return res.status(404).json({ success: false, message: 'job not found' });
     }
@@ -88,10 +93,14 @@ const getJob = async (req, res, next) => {
 
 const updateJob = async (req, res, next) => {
   try {
-    const job = await Job.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    const job = await Job.findOneAndUpdate(
+      { _id: req.params.id, user: req.user.userId },
+      req.body,
+      {
+        new: true,
+        runValidators: true,
+      },
+    );
     if (!job) {
       return res.status(404).json({
         success: false,
@@ -106,7 +115,10 @@ const updateJob = async (req, res, next) => {
 
 const deleteJob = async (req, res, next) => {
   try {
-    const job = await Job.findByIdAndDelete(req.params.id);
+    const job = await Job.findOneAndDelete({
+      _id: req.params.id,
+      user: req.user.userId,
+    });
     if (!job) {
       return res.status(404).json({
         message: 'job not found',
@@ -118,4 +130,43 @@ const deleteJob = async (req, res, next) => {
   }
 };
 
-export { createJob, getJobs, getJob, updateJob, deleteJob };
+const getJobStats = async (req, res, next) => {
+  try {
+    const stats = await Job.aggregate([
+      {
+        $match: {
+          user: new mongoose.Types.ObjectId(req.user.userId),
+        },
+      },
+      {
+        $group: {
+          _id: '$status',
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const formattedStats = stats.reduce(
+      (acc, item) => {
+        acc[item._id] = item.count;
+        return acc;
+      },
+      {
+        Applied: 0,
+        Interview: 0,
+        Rejected: 0,
+        Offer: 0,
+        Accepted: 0,
+      },
+    );
+
+    res.status(200).json({
+      success: true,
+      stats: formattedStats,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export { createJob, getJobs, getJob, updateJob, deleteJob, getJobStats };

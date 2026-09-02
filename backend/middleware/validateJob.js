@@ -5,6 +5,7 @@ const validateCreateJob = (req, res, next) => {
   if (!result.success) {
     return next(result.error);
   }
+  req.body = result.data;
   next();
 };
 export default validateCreateJob;

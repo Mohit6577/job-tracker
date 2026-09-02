@@ -1,32 +1,17 @@
-import dotenv from 'dotenv';
 import mongoose from 'mongoose';
-import express from 'express';
-import jobRoutes from './routes/jobRoutes.js';
-import authRoutes from './routes/authRoutes.js';
-import errorMiddleware from './middleware/errorMiddleware.js';
+import env from './config/env.js';
+import app from './app.js';
 
-dotenv.config();
-const app = express();
-const PORT = process.env.PORT || 5000;
-
-app.use(express.json());
-app.use('/api/jobs', jobRoutes);
-app.use('/api/auth', authRoutes);
-app.use(errorMiddleware);
+const PORT = env.PORT || 5000;
 
 mongoose
-  .connect(process.env.MONGO_URI)
+  .connect(env.MONGO_URI)
   .then(() => {
     console.log('MongoDB connected');
+    app.listen(PORT, () => {
+      console.log(`Server is runing on ${PORT}`);
+    });
   })
   .catch((err) => {
     console.log('MongoDB connection failed', err.message);
   });
-
-app.get('/api/health', (req, res) => {
-  res.json('status:ok');
-});
-
-app.listen(PORT, () => {
-  console.log(`Server is runing on 5000`);
-});

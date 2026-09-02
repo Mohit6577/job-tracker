@@ -8,4 +8,6 @@ const createJobSchema = z.object({
   notes: z.string().optional(),
 });
 
-export { createJobSchema };
+const updateJobSchema = createJobSchema.partial();
+
+export { createJobSchema, updateJobSchema };
