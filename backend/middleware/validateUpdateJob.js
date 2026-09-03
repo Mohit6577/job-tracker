@@ -1,4 +1,3 @@
-import { success } from 'zod';
 import { updateJobSchema } from '../validators/jobValidator.js';
 
 const validateUpdateJob = (req, res, next) => {
@@ -6,7 +5,7 @@ const validateUpdateJob = (req, res, next) => {
   if (!result.success) {
     return next(result.error);
   }
-  req.body = success;
+  req.body = result.data;
   next();
 };
 

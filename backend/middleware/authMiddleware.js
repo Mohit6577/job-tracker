@@ -4,20 +4,26 @@ const authMiddleware = (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
-      return next(new Error('Authentication required'));
+      const error = new Error('Authentication required');
+      error.statusCode = 401;
+      return next(error);
     }
 
     const [scheme, token] = authHeader.split(' ');
 
     if (scheme !== 'Bearer' || !token) {
-      return next(new Error('Invalid authorization header'));
+      const error = new Error('Authorizaton required');
+      error.statusCode = 401;
+      return next(error);
     }
 
     const decoded = jwt.verify(token, env.JWT_SECRET);
     req.user = decoded;
     next();
   } catch (error) {
-    next(error);
+    const authError = new Error('Invalid or expired token');
+    authError.statusCode = 401;
+    return next(authError);
   }
 };
 

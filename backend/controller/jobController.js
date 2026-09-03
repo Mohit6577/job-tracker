@@ -1,4 +1,3 @@
-import { success } from 'zod';
 import Job from '../models/Job.js';
 import mongoose from 'mongoose';
 
@@ -83,7 +82,7 @@ const getJob = async (req, res, next) => {
       user: req.user.userId,
     });
     if (!job) {
-      return res.status(404).json({ success: false, message: 'job not found' });
+      return res.status(404).json({ success: false, message: 'Job not found' });
     }
     res.status(200).json(job);
   } catch (error) {
@@ -97,15 +96,14 @@ const updateJob = async (req, res, next) => {
       { _id: req.params.id, user: req.user.userId },
       req.body,
       {
-        new: true,
+        returnDocument: 'after',
         runValidators: true,
       },
     );
     if (!job) {
-      return res.status(404).json({
-        success: false,
-        message: 'Job not found',
-      });
+      const error = new Error('Job not found');
+      error.statusCode = 404;
+      return next(error);
     }
     res.status(200).json(job);
   } catch (error) {
@@ -120,9 +118,9 @@ const deleteJob = async (req, res, next) => {
       user: req.user.userId,
     });
     if (!job) {
-      return res.status(404).json({
-        message: 'job not found',
-      });
+      const error = new Error('Job not found');
+      error.statusCode = 404;
+      return next(error);
     }
     res.status(200).json(job);
   } catch (error) {

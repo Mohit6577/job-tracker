@@ -55,13 +55,13 @@ const loginUser = async (req, res, next) => {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
     if (!user) {
-      const error = new Error('Login credentials do not exists');
+      const error = new Error('Login credentials does not exists');
       error.statusCode = 401;
       return next(error);
     }
     const isPassword = await bcrypt.compare(password, user.password);
     if (!isPassword) {
-      const error = new Error('Login credentials do not exists');
+      const error = new Error('Login credentials does not exists');
       error.statusCode = 401;
       return next(error);
     }
