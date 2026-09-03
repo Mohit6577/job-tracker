@@ -13,8 +13,8 @@ import {
 
 const router = Router();
 
-router.post('/register', validateRegister, authLimiter, registerUser);
-router.post('/login', validateLogin, authLimiter, loginUser);
+router.post('/register', authLimiter, validateRegister, registerUser);
+router.post('/login', authLimiter, validateLogin, loginUser);
 router.get('/me', authMiddleware, getMe);
 
 export default router;

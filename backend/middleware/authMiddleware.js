@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import env from '../config/env';
+import env from '../config/env.js';
 const authMiddleware = (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
@@ -12,7 +12,7 @@ const authMiddleware = (req, res, next) => {
     const [scheme, token] = authHeader.split(' ');
 
     if (scheme !== 'Bearer' || !token) {
-      const error = new Error('Authorizaton required');
+      const error = new Error('Authorization required');
       error.statusCode = 401;
       return next(error);
     }

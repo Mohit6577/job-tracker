@@ -169,3 +169,14 @@ it('rejects expired token from getting current user', async () => {
   expect(response.body.success).toBe(false);
   expect(response.body.message).toBe('Invalid or expired token');
 });
+
+//case-sensitive
+it('normalizes user email', async () => {
+  const response = await request(app).post('/api/auth/register').send({
+    email: 'USER@EXAMPLE.COM',
+    password: 'password123',
+  });
+
+  expect(response.status).toBe(201);
+  expect(response.body.user.email).toBe('user@example.com');
+});
