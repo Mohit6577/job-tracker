@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Navbar from './Navbar';
 import Dashboard from './Dashboard';
 import Jobs from './Jobs';
@@ -6,26 +7,31 @@ import Addjob from './Addjob';
 import Homepage from './Homepage';
 
 function App() {
-  const [selectedPage, setSelectedPage] = useState('');
-  function handlePageChange(page) {
-    setSelectedPage(page);
+  const [isLoggedIn, setIsLoggedIn] = useState(
+    () => !!localStorage.getItem('token'),
+  );
+
+  function handleLogout() {
+    localStorage.removeItem('token');
+    setIsLoggedIn(false);
   }
   return (
-    <section id="center">
-      {selectedPage !== '' && <Navbar onPageChange={handlePageChange} />}
-
-      <div>
-        {selectedPage === 'Dashboard' ? (
-          <Dashboard />
-        ) : selectedPage === 'Jobs' ? (
-          <Jobs />
-        ) : selectedPage === 'Add Job' ? (
-          <Addjob />
+    <BrowserRouter>
+      <section id="center">
+        {!isLoggedIn ? (
+          <Homepage onLogin={() => setIsLoggedIn(true)} />
         ) : (
-          <Homepage />
+          <>
+            <Navbar onLogout={handleLogout} />
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/jobs" element={<Jobs />} />
+              <Route path="/add-job" element={<Addjob />} />
+            </Routes>
+          </>
         )}
-      </div>
-    </section>
+      </section>
+    </BrowserRouter>
   );
 }
 

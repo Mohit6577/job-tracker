@@ -1,73 +1,2566 @@
-.job-card {
-  padding: 20px;
-  margin: 15px 0;
-  border: 2px solid #ddd;
-  border-radius: 10px;
-  background-color: white;
-  transition: 0.2s;
+
+nah lol i am not here to learn css at all bud build it all insane level and btw our selected job is showing id of that job
+
+Yep. CSS is my problem, not yours. 😭 We'll make this look like a real production SaaS dashboard.
+
+And yes — the "Selected Job is: 68..." is happening because selectedJob currently stores the ID, which is useful internally, but we're rendering that raw ID to the screen. We should never show that to the user.
+
+Let's replace the current Jobs page with a proper application-management UI.
+
+1. Replace Jobs.jsx
+
+An error occurred inside the visualization
+
+Important change
+Notice what we're doing now:
+
+function handleJobSelect(job) {
+  setSelectedJob(job);
 }
 
-.job-card:hover {
-  border-color: #888;
+Instead of:
+
+setSelectedJob(job._id);
+
+So selectedJob contains the whole job object.
+
+That means we can directly do:
+
+selectedJob.company
+selectedJob.position
+selectedJob.status
+selectedJob.location
+selectedJob.notes
+
+And we only use:
+
+selectedJob._id
+
+when we actually need the ID.
+
+That's a much cleaner state model for this page.
+
+2. Replace Jobs.css
+This is the part you explicitly don't need to learn. 😂
+
+.jobs-page {
+  min-height: calc(100vh - 72px);
+  padding: 42px 48px 60px;
+  background:
+    radial-gradient(circle at 10% 0%, rgba(99, 102, 241, 0.08), transparent 28%),
+    #090b10;
+  color: #f4f4f5;
 }
 
-.job-card.selected {
-  border-color: #2563eb;
-  background-color: #eff6ff;
+/* =========================
+   HEADER
+========================= */
+
+.jobs-header {
+  max-width: 1500px;
+  margin: 0 auto 30px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 30px;
 }
 
-.job-card button {
-  padding: 10px 16px;
-  border: none;
-  border-radius: 6px;
-  background-color: #222;
-  color: white;
-  font-size: 16px;
-  cursor: pointer;
+.eyebrow {
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  color: #71717a;
 }
 
-.job-card button:hover {
-  background-color: #444;
+.jobs-header h1 {
+  margin: 0;
+  font-size: 34px;
+  line-height: 1.15;
+  letter-spacing: -0.04em;
 }
 
-.job-card p {
-  margin: 8px 0;
-}
-
-.status {
-  display: inline-block;
-  padding: 5px 10px;
-  border-radius: 20px;
-  font-weight: 600;
+.jobs-subtitle {
+  margin: 9px 0 0;
+  color: #85858f;
   font-size: 14px;
 }
 
-.status.applied {
-  background-color: #e0e7ff;
-  color: #3730a3;
+.jobs-count {
+  min-width: 150px;
+  padding: 16px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.025);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
 }
 
-.status.interview {
-  background-color: #fef3c7;
-  color: #92400e;
+.jobs-count span {
+  font-size: 25px;
+  font-weight: 800;
 }
 
-.status.rejected {
-  background-color: #fee2e2;
-  color: #b91c1c;
+.jobs-count small {
+  margin-top: 3px;
+  color: #71717a;
+  font-size: 11px;
 }
 
-.status.offer {
-  background-color: #dcfce7;
-  color: #166534;
+/* =========================
+   TOOLBAR
+========================= */
+
+.jobs-toolbar {
+  max-width: 1500px;
+  margin: 0 auto 18px;
+  display: flex;
+  gap: 12px;
 }
 
-.status.accepted {
-  background-color: #bbf7d0;
-  color: #15803d;
+.search-wrapper {
+  flex: 1;
+  position: relative;
 }
-.job-card.selected {
-  border-color: #16a34a;
-  background-color: #f0fdf4;
-  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.15);
+
+.search-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #71717a;
+  font-size: 22px;
+}
+
+.search-wrapper input,
+.jobs-toolbar select {
+  height: 46px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.035);
+  color: #f4f4f5;
+  outline: none;
+  transition: 0.2s ease;
+}
+
+.search-wrapper input {
+  width: 100%;
+  padding: 0 16px 0 46px;
+  box-sizing: border-box;
+}
+
+.jobs-toolbar select {
+  min-width: 170px;
+  padding: 0 14px;
+}
+
+.search-wrapper input::placeholder {
+  color: #5f6068;
+}
+
+.search-wrapper input:focus,
+.jobs-toolbar select:focus {
+  border-color: rgba(129, 140, 248, 0.6);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* =========================
+   CONTENT
+========================= */
+
+.jobs-content {
+  max-width: 1500px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 370px;
+  gap: 18px;
+  align-items: start;
+}
+
+/* =========================
+   TABLE
+========================= */
+
+.jobs-table-card {
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.018);
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.2);
+}
+
+.table-header {
+  height: 46px;
+  padding: 0 22px;
+  display: grid;
+  grid-template-columns: 1.6fr 1.5fr 1fr 1fr;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  color: #62636c;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+
+.job-row {
+  width: 100%;
+  min-height: 78px;
+  padding: 0 22px;
+  display: grid;
+  grid-template-columns: 1.6fr 1.5fr 1fr 1fr;
+  align-items: center;
+  gap: 15px;
+  border: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.045);
+  background: transparent;
+  color: #d4d4d8;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background 0.18s ease,
+    transform 0.18s ease;
+}
+
+.job-row:last-child {
+  border-bottom: 0;
+}
+
+.job-row:hover {
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.job-row.selected {
+  background: rgba(99, 102, 241, 0.09);
+  box-shadow: inset 3px 0 0 #818cf8;
+}
+
+.company-cell {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-width: 0;
+}
+
+.company-avatar,
+.details-avatar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 11px;
+  background: linear-gradient(
+    135deg,
+    rgba(129, 140, 248, 0.25),
+    rgba(99, 102, 241, 0.08)
+  );
+  border: 1px solid rgba(129, 140, 248, 0.18);
+  color: #a5b4fc;
+  font-weight: 800;
+}
+
+.company-avatar {
+  width: 38px;
+  height: 38px;
+  font-size: 14px;
+}
+
+.company-cell div:last-child {
+  min-width: 0;
+}
+
+.company-cell strong {
+  display: block;
+  overflow: hidden;
+  color: #f4f4f5;
+  font-size: 14px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.company-cell span {
+  display: block;
+  margin-top: 3px;
+  color: #5f6068;
+  font-size: 11px;
+}
+
+.position-cell {
+  overflow: hidden;
+  color: #b8b8c1;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.location-cell {
+  overflow: hidden;
+  color: #85858f;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* =========================
+   STATUS
+========================= */
+
+.status-badge {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.035);
+  color: #b8b8c1;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.status-badge.applied {
+  color: #60a5fa;
+  background: rgba(96, 165, 250, 0.08);
+  border-color: rgba(96, 165, 250, 0.16);
+}
+
+.status-badge.interview {
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.08);
+  border-color: rgba(251, 191, 36, 0.16);
+}
+
+.status-badge.rejected {
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.08);
+  border-color: rgba(248, 113, 113, 0.16);
+}
+
+.status-badge.offer,
+.status-badge.accepted {
+  color: #4ade80;
+  background: rgba(74, 222, 128, 0.08);
+  border-color: rgba(74, 222, 128, 0.16);
+}
+
+/* =========================
+   DETAILS PANEL
+========================= */
+
+.job-details {
+  min-height: 500px;
+  position: sticky;
+  top: 24px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 16px;
+  background:
+    radial-gradient(
+      circle at 90% 0%,
+      rgba(129, 140, 248, 0.08),
+      transparent 40%
+    ),
+    rgba(255, 255, 255, 0.018);
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.2);
+}
+
+.details-placeholder {
+  min-height: 500px;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.placeholder-icon {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  color: #818cf8;
+  background: rgba(129, 140, 248, 0.07);
+  font-size: 20px;
+}
+
+.details-placeholder h3 {
+  margin: 0;
+  font-size: 15px;
+}
+
+.details-placeholder p {
+  max-width: 220px;
+  margin: 8px 0 0;
+  color: #656670;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.details-top {
+  padding: 25px;
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.details-avatar {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 18px;
+  font-size: 17px;
+}
+
+.details-label,
+.detail-label {
+  margin: 0 0 5px;
+  color: #62636c;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.details-top h2 {
+  margin: 0;
+  font-size: 22px;
+  letter-spacing: -0.03em;
+}
+
+.details-position {
+  margin: 5px 0 0;
+  color: #85858f;
+  font-size: 13px;
+}
+
+.close-details {
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #71717a;
+  font-size: 21px;
+  cursor: pointer;
+}
+
+.close-details:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #f4f4f5;
+}
+
+.details-status {
+  padding: 20px 25px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.detail-section {
+  padding: 19px 25px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.detail-section p {
+  margin: 7px 0 0;
+  color: #c4c4cc;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.detail-section .notes {
+  color: #85858f;
+}
+
+.application-id {
+  overflow: hidden;
+  color: #63646d !important;
+  font-family: monospace;
+  font-size: 10px !important;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.details-actions {
+  padding: 22px 25px;
+  display: flex;
+  gap: 10px;
+}
+
+.edit-button,
+.delete-button {
+  height: 40px;
+  border-radius: 9px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.edit-button {
+  flex: 1;
+  border: 1px solid rgba(129, 140, 248, 0.25);
+  background: rgba(129, 140, 248, 0.1);
+  color: #a5b4fc;
+}
+
+.edit-button:hover {
+  background: rgba(129, 140, 248, 0.18);
+}
+
+.delete-button {
+  padding: 0 16px;
+  border: 1px solid rgba(248, 113, 113, 0.15);
+  background: rgba(248, 113, 113, 0.06);
+  color: #f87171;
+}
+
+.delete-button:hover {
+  background: rgba(248, 113, 113, 0.12);
+}
+
+/* =========================
+   EMPTY / LOADING
+========================= */
+
+.jobs-empty {
+  min-height: 360px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #71717a;
+}
+
+.jobs-empty h3 {
+  margin: 12px 0 4px;
+  color: #b8b8c1;
+  font-size: 14px;
+}
+
+.jobs-empty p {
+  margin: 0;
+  color: #5f6068;
+  font-size: 12px;
+}
+
+.empty-icon {
+  font-size: 28px;
+  color: #52535b;
+}
+
+.loading-spinner {
+  width: 25px;
+  height: 25px;
+  border: 2px solid rgba(255, 255, 255, 0.08);
+  border-top-color: #818cf8;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 1100px) {
+  .jobs-content {
+    grid-template-columns: 1fr;
+  }
+
+  .job-details {
+    position: static;
+    min-height: auto;
+  }
+
+  .details-placeholder {
+    min-height: 250px;
+  }
+}
+
+@media (max-width: 750px) {
+  .jobs-page {
+    padding: 28px 18px 40px;
+  }
+
+  .jobs-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .jobs-count {
+    align-items: flex-start;
+  }
+
+  .jobs-toolbar {
+    flex-direction: column;
+  }
+
+  .jobs-toolbar select {
+    width: 100%;
+  }
+
+  .table-header {
+    display: none;
+  }
+
+  .job-row {
+    padding: 17px;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .position-cell,
+  .location-cell {
+    padding-left: 51px;
+  }
+}
+
+What you'll get
+Instead of:
+
+Jobs page
+Here you can view your applications
+Google
+Software Engineer
+Applied
+India
+Selected Job is: 68f...
+
+you'll have:
+
+proper SaaS-style page header
+application count
+search
+status filtering
+responsive application table
+company avatars
+polished status badges
+selected-row highlighting
+dedicated job-detail panel
+notes
+location
+application ID only where it actually belongs
+edit/delete action area
+loading state
+empty state
+responsive mobile layout
+proper _id handling
+And importantly, the ID is no longer your selectedJob itself. The selected state is now the actual job object, so the UI can work with the complete application.
+
+One thing I've deliberately left as UI-only for now:
+
+<button className="edit-button">Edit Application</button>
+<button className="delete-button">Delete</button>
+
+They don't do anything yet. Next we wire those to the PATCH/DELETE endpoints you already built.
+
+wtf is all statuses?? what is this wording and why that dropdown ui is white adn raw?
+
+Yeah, you're right. Two bad design choices there.
+
+1. "All statuses" is ugly wording
+For this app, the control should simply say:
+
+Status
+
+with options:
+
+All
+Applied
+Interview
+Rejected
+Offer
+Accepted
+Or better visually: a segmented filter / custom dropdown rather than a native <select>.
+
+2. The white/native dropdown is because <select> is browser-rendered
+This:
+
+<select>
+
+is giving you the ugly native Windows/browser control. CSS can only partially control native dropdown menus.
+
+For a polished UI, we should not use the native select at all.
+
+I'd replace it with a custom React dropdown:
+
+┌──────────────────┐
+│ Status       ▾   │
+└──────────────────┘
+Click:
+
+┌──────────────────┐
+│ Status       ▴   │
+├──────────────────┤
+│ All              │
+│ Applied          │
+│ Interview        │
+│ Rejected         │
+│ Offer            │
+│ Accepted         │
+└──────────────────┘
+Dark, matching the rest of the application, with the selected option highlighted.
+
+Also, I'd change the toolbar wording to something much cleaner:
+
+Jobs
+Track and manage your applications
+
+[ 🔍 Search applications... ] [ Status ▾ ]
+No "APPLICATIONS", no "All statuses", no weird marketing copy.
+
+And I'd make the status filter actually look like part of the Job Tracker rather than a generic HTML form control.
+
+So yes — scrap that native dropdown. We should make the filter custom and consistent with the dark UI.
+
+yes
+
+Yep. Let's replace the native <select> with a proper dark custom dropdown and clean up the wording.
+
+In Jobs.jsx
+Replace the current <select> block with:
+
+<div className="status-filter">
+  <button
+    className="status-filter-button"
+    onClick={() => setStatusFilterOpen(!statusFilterOpen)}
+  >
+    <span>{statusFilter === 'All' ? 'Status' : statusFilter}</span>
+    <span className="filter-chevron">⌄</span>
+  </button>
+
+  {statusFilterOpen && (
+    <div className="status-filter-menu">
+      {['All', 'Applied', 'Interview', 'Rejected', 'Offer', 'Accepted'].map(
+        (status) => (
+          <button
+            key={status}
+            className={statusFilter === status ? 'active' : ''}
+            onClick={() => {
+              setStatusFilter(status);
+              setStatusFilterOpen(false);
+            }}
+          >
+            {status}
+          </button>
+        )
+      )}
+    </div>
+  )}
+</div>
+
+At the top with your other state:
+
+const [statusFilterOpen, setStatusFilterOpen] = useState(false);
+
+And your toolbar becomes:
+
+<section className="jobs-toolbar">
+  <div className="search-wrapper">
+    <span className="search-icon">⌕</span>
+
+    <input
+      type="text"
+      placeholder="Search applications..."
+      value={search}
+      onChange={(e) => setSearch(e.target.value)}
+    />
+  </div>
+
+  {/* custom status dropdown here */}
+</section>
+
+Add this to Jobs.css
+.status-filter {
+  position: relative;
+  min-width: 150px;
+}
+
+.status-filter-button {
+  width: 100%;
+  height: 46px;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+
+  background: rgba(255, 255, 255, 0.035);
+  color: #a1a1aa;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.status-filter-button:hover,
+.status-filter-button:focus {
+  border-color: rgba(129, 140, 248, 0.45);
+  background: rgba(255, 255, 255, 0.055);
+  color: #f4f4f5;
+}
+
+.filter-chevron {
+  color: #71717a;
+  font-size: 16px;
+}
+
+.status-filter-menu {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 7px);
+  left: 0;
+  width: 100%;
+  padding: 6px;
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 11px;
+
+  background: #111318;
+  box-shadow:
+    0 18px 45px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(255, 255, 255, 0.02);
+
+  animation: dropdownIn 0.12s ease-out;
+}
+
+.status-filter-menu button {
+  width: 100%;
+  height: 36px;
+  padding: 0 10px;
+
+  display: flex;
+  align-items: center;
+
+  border: 0;
+  border-radius: 7px;
+
+  background: transparent;
+  color: #a1a1aa;
+
+  font-size: 12px;
+  font-weight: 600;
+  text-align: left;
+
+  cursor: pointer;
+  transition: 0.15s ease;
+}
+
+.status-filter-menu button:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #f4f4f5;
+}
+
+.status-filter-menu button.active {
+  background: rgba(129, 140, 248, 0.12);
+  color: #a5b4fc;
+}
+
+@keyframes dropdownIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+And remove the old:
+
+.jobs-toolbar select {
+   ...
+}
+
+and the old <select> entirely.
+
+One small thing: because the dropdown is now custom, we'll eventually add click-outside-to-close so clicking elsewhere closes it. For now, get this visual version working first.
+
+jst give me polished both files
+
+Yep. Here are the complete polished Jobs.jsx and Jobs.css. Replace both files entirely.
+
+Jobs.jsx
+import { useEffect, useState } from 'react';
+import apiFetch from './api';
+import './Jobs.css';
+
+const STATUSES = ['All', 'Applied', 'Interview', 'Rejected', 'Offer', 'Accepted'];
+
+function Jobs() {
+  const [jobs, setJobs] = useState([]);
+  const [pagination, setPagination] = useState(null);
+
+  const [selectedJob, setSelectedJob] = useState(null);
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('All');
+
+  const [statusOpen, setStatusOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchJobs() {
+      try {
+        const response = await apiFetch('/api/jobs');
+        const data = await response.json();
+
+        setJobs(data.data || []);
+        setPagination(data.pagination || null);
+      } catch (error) {
+        console.error('Failed to fetch jobs:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchJobs();
+  }, []);
+
+  function selectJob(job) {
+    setSelectedJob(job);
+  }
+
+  function getStatusClass(status) {
+    return status.toLowerCase();
+  }
+
+  const filteredJobs = jobs.filter((job) => {
+    const query = search.toLowerCase().trim();
+
+    const matchesSearch =
+      !query ||
+      job.company?.toLowerCase().includes(query) ||
+      job.position?.toLowerCase().includes(query) ||
+      job.location?.toLowerCase().includes(query);
+
+    const matchesStatus =
+      statusFilter === 'All' || job.status === statusFilter;
+
+    return matchesSearch && matchesStatus;
+  });
+
+  return (
+    <main className="jobs-page">
+      <div className="jobs-container">
+
+        {/* Header */}
+        <header className="jobs-header">
+          <div>
+            <h1>Jobs</h1>
+            <p>Track and manage your job applications.</p>
+          </div>
+
+          <div className="jobs-total">
+            <strong>{pagination?.totalJobs ?? jobs.length}</strong>
+            <span>applications</span>
+          </div>
+        </header>
+
+        {/* Toolbar */}
+        <div className="jobs-toolbar">
+
+          <div className="search-box">
+            <svg
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <circle cx="11" cy="11" r="6.5" />
+              <path d="m16 16 5 5" />
+            </svg>
+
+            <input
+              type="text"
+              placeholder="Search applications..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+
+            {search && (
+              <button
+                className="clear-search"
+                onClick={() => setSearch('')}
+              >
+                ×
+              </button>
+            )}
+          </div>
+
+          {/* Custom status dropdown */}
+          <div className="status-filter">
+            <button
+              className={`status-trigger ${
+                statusOpen ? 'open' : ''
+              }`}
+              onClick={() => setStatusOpen((prev) => !prev)}
+            >
+              <span>
+                {statusFilter === 'All' ? 'Status' : statusFilter}
+              </span>
+
+              <svg
+                className="chevron"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path d="m7 10 5 5 5-5" />
+              </svg>
+            </button>
+
+            {statusOpen && (
+              <div className="status-menu">
+                {STATUSES.map((status) => (
+                  <button
+                    key={status}
+                    className={
+                      statusFilter === status ? 'active' : ''
+                    }
+                    onClick={() => {
+                      setStatusFilter(status);
+                      setStatusOpen(false);
+                    }}
+                  >
+                    <span>{status === 'All' ? 'All' : status}</span>
+
+                    {statusFilter === status && (
+                      <svg
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                      >
+                        <path d="m5 12 4 4L19 6" />
+                      </svg>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="jobs-layout">
+
+          {/* Applications */}
+          <section className="jobs-card">
+
+            <div className="jobs-card-header">
+              <div>
+                <h2>Applications</h2>
+                <span>
+                  {filteredJobs.length}{' '}
+                  {filteredJobs.length === 1
+                    ? 'application'
+                    : 'applications'}
+                </span>
+              </div>
+            </div>
+
+            {loading ? (
+              <div className="jobs-state">
+                <div className="spinner" />
+                <p>Loading applications...</p>
+              </div>
+            ) : filteredJobs.length === 0 ? (
+              <div className="jobs-state">
+                <div className="empty-icon">
+                  <svg viewBox="0 0 24 24">
+                    <circle cx="11" cy="11" r="6.5" />
+                    <path d="m16 16 5 5" />
+                  </svg>
+                </div>
+
+                <h3>No applications found</h3>
+                <p>
+                  Try changing your search or status filter.
+                </p>
+              </div>
+            ) : (
+              <div className="job-list">
+
+                {filteredJobs.map((job) => (
+                  <button
+                    key={job._id}
+                    className={`job-item ${
+                      selectedJob?._id === job._id
+                        ? 'selected'
+                        : ''
+                    }`}
+                    onClick={() => selectJob(job)}
+                  >
+                    <div className="company-logo">
+                      {job.company?.charAt(0).toUpperCase()}
+                    </div>
+
+                    <div className="job-main">
+                      <strong>{job.company}</strong>
+                      <span>{job.position}</span>
+                    </div>
+
+                    <div className="job-location">
+                      <svg viewBox="0 0 24 24">
+                        <path d="M12 21s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12Z" />
+                        <circle cx="12" cy="9" r="2.2" />
+                      </svg>
+
+                      <span>
+                        {job.location || 'Remote'}
+                      </span>
+                    </div>
+
+                    <span
+                      className={`job-status ${getStatusClass(
+                        job.status
+                      )}`}
+                    >
+                      <i />
+                      {job.status}
+                    </span>
+
+                    <svg
+                      className="row-arrow"
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="m9 18 6-6-6-6" />
+                    </svg>
+                  </button>
+                ))}
+
+              </div>
+            )}
+
+          </section>
+
+          {/* Details */}
+          <aside className="job-details-card">
+
+            {!selectedJob ? (
+              <div className="details-empty">
+                <div className="details-empty-icon">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" />
+                    <path d="M9 8h6M9 12h6M9 16h4" />
+                  </svg>
+                </div>
+
+                <h3>Select an application</h3>
+
+                <p>
+                  Choose an application from the list
+                  to view its details.
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="details-header">
+
+                  <div className="details-company">
+                    <div className="details-logo">
+                      {selectedJob.company
+                        ?.charAt(0)
+                        .toUpperCase()}
+                    </div>
+
+                    <div>
+                      <span>APPLICATION</span>
+                      <h2>{selectedJob.company}</h2>
+                      <p>{selectedJob.position}</p>
+                    </div>
+                  </div>
+
+                  <button
+                    className="close-details"
+                    onClick={() => setSelectedJob(null)}
+                  >
+                    ×
+                  </button>
+                </div>
+
+                <div className="details-body">
+
+                  <div className="details-status-row">
+                    <span
+                      className={`job-status ${getStatusClass(
+                        selectedJob.status
+                      )}`}
+                    >
+                      <i />
+                      {selectedJob.status}
+                    </span>
+                  </div>
+
+                  <div className="detail-block">
+                    <span>LOCATION</span>
+
+                    <div className="detail-value">
+                      <svg viewBox="0 0 24 24">
+                        <path d="M12 21s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12Z" />
+                        <circle cx="12" cy="9" r="2.2" />
+                      </svg>
+
+                      {selectedJob.location || 'Not specified'}
+                    </div>
+                  </div>
+
+                  <div className="detail-block">
+                    <span>NOTES</span>
+
+                    <p className="notes">
+                      {selectedJob.notes ||
+                        'No notes added for this application.'}
+                    </p>
+                  </div>
+
+                  <div className="detail-block">
+                    <span>APPLICATION ID</span>
+
+                    <code>
+                      {selectedJob._id}
+                    </code>
+                  </div>
+
+                </div>
+
+                <div className="details-footer">
+                  <button className="edit-btn">
+                    Edit application
+                  </button>
+
+                  <button className="delete-btn">
+                    Delete
+                  </button>
+                </div>
+              </>
+            )}
+
+          </aside>
+
+        </div>
+      </div>
+    </main>
+  );
+}
+
+export default Jobs;
+
+Jobs.css
+.jobs-page {
+  min-height: calc(100vh - 72px);
+  padding: 42px 48px 60px;
+  box-sizing: border-box;
+  background:
+    radial-gradient(
+      circle at 8% 0%,
+      rgba(99, 102, 241, 0.08),
+      transparent 28%
+    ),
+    #090b10;
+  color: #f4f4f5;
+}
+
+.jobs-container {
+  width: 100%;
+  max-width: 1500px;
+  margin: 0 auto;
+}
+
+/* =========================
+   HEADER
+========================= */
+
+.jobs-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 30px;
+  margin-bottom: 28px;
+}
+
+.jobs-header h1 {
+  margin: 0;
+  font-size: 32px;
+  line-height: 1;
+  font-weight: 750;
+  letter-spacing: -0.04em;
+}
+
+.jobs-header p {
+  margin: 10px 0 0;
+  color: #71717a;
+  font-size: 14px;
+}
+
+.jobs-total {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  padding: 12px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.jobs-total strong {
+  color: #f4f4f5;
+  font-size: 21px;
+  line-height: 1;
+}
+
+.jobs-total span {
+  margin-top: 5px;
+  color: #62636c;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* =========================
+   TOOLBAR
+========================= */
+
+.jobs-toolbar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.search-box {
+  position: relative;
+  flex: 1;
+}
+
+.search-box > svg {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  width: 17px;
+  height: 17px;
+  transform: translateY(-50%);
+  fill: none;
+  stroke: #62636c;
+  stroke-width: 1.7;
+  pointer-events: none;
+}
+
+.search-box input {
+  width: 100%;
+  height: 44px;
+  padding: 0 42px;
+  box-sizing: border-box;
+
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 10px;
+  outline: none;
+
+  background: rgba(255, 255, 255, 0.028);
+  color: #f4f4f5;
+
+  font-family: inherit;
+  font-size: 13px;
+
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease;
+}
+
+.search-box input::placeholder {
+  color: #5d5e67;
+}
+
+.search-box input:focus {
+  border-color: rgba(129, 140, 248, 0.45);
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.clear-search {
+  position: absolute;
+  right: 11px;
+  top: 50%;
+  width: 25px;
+  height: 25px;
+  transform: translateY(-50%);
+
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #71717a;
+
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.clear-search:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #f4f4f5;
+}
+
+/* =========================
+   CUSTOM STATUS FILTER
+========================= */
+
+.status-filter {
+  position: relative;
+  width: 145px;
+}
+
+.status-trigger {
+  width: 100%;
+  height: 44px;
+  padding: 0 13px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 10px;
+
+  background: rgba(255, 255, 255, 0.028);
+  color: #a1a1aa;
+
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+
+  cursor: pointer;
+  transition: 0.18s ease;
+}
+
+.status-trigger:hover,
+.status-trigger.open {
+  border-color: rgba(129, 140, 248, 0.4);
+  background: rgba(255, 255, 255, 0.045);
+  color: #f4f4f5;
+}
+
+.chevron {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: #71717a;
+  stroke-width: 1.8;
+  transition: transform 0.18s ease;
+}
+
+.status-trigger.open .chevron {
+  transform: rotate(180deg);
+}
+
+.status-menu {
+  position: absolute;
+  z-index: 50;
+  top: calc(100% + 7px);
+  left: 0;
+  width: 100%;
+  padding: 5px;
+
+  box-sizing: border-box;
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 11px;
+
+  background: #111318;
+
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.015);
+
+  animation: menu-in 0.12s ease-out;
+}
+
+.status-menu button {
+  width: 100%;
+  height: 34px;
+  padding: 0 9px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  border: 0;
+  border-radius: 7px;
+
+  background: transparent;
+  color: #8f9099;
+
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  text-align: left;
+
+  cursor: pointer;
+  transition: 0.14s ease;
+}
+
+.status-menu button:hover {
+  background: rgba(255, 255, 255, 0.055);
+  color: #f4f4f5;
+}
+
+.status-menu button.active {
+  background: rgba(129, 140, 248, 0.1);
+  color: #a5b4fc;
+}
+
+.status-menu button svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+}
+
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =========================
+   MAIN GRID
+========================= */
+
+.jobs-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 370px;
+  gap: 16px;
+  align-items: start;
+}
+
+/* =========================
+   APPLICATION CARD
+========================= */
+
+.jobs-card,
+.job-details-card {
+  overflow: hidden;
+
+  border: 1px solid rgba(255, 255, 255, 0.065);
+  border-radius: 15px;
+
+  background: rgba(255, 255, 255, 0.018);
+
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.18);
+}
+
+.jobs-card-header {
+  height: 62px;
+  padding: 0 20px;
+
+  display: flex;
+  align-items: center;
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.055);
+}
+
+.jobs-card-header h2 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.jobs-card-header span {
+  display: block;
+  margin-top: 4px;
+  color: #5f6068;
+  font-size: 10px;
+}
+
+/* =========================
+   JOB LIST
+========================= */
+
+.job-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.job-item {
+  width: 100%;
+  min-height: 76px;
+  padding: 13px 18px;
+
+  display: grid;
+  grid-template-columns: 40px minmax(160px, 1.5fr) minmax(100px, 1fr) 105px 18px;
+  align-items: center;
+  gap: 13px;
+
+  border: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.045);
+
+  background: transparent;
+  color: inherit;
+
+  text-align: left;
+  font-family: inherit;
+
+  cursor: pointer;
+
+  transition:
+    background 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+.job-item:last-child {
+  border-bottom: 0;
+}
+
+.job-item:hover {
+  background: rgba(255, 255, 255, 0.027);
+}
+
+.job-item.selected {
+  background: rgba(129, 140, 248, 0.07);
+  box-shadow: inset 2px 0 0 #818cf8;
+}
+
+.company-logo,
+.details-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid rgba(129, 140, 248, 0.18);
+  background:
+    linear-gradient(
+      135deg,
+      rgba(129, 140, 248, 0.2),
+      rgba(99, 102, 241, 0.06)
+    );
+
+  color: #a5b4fc;
+  font-weight: 800;
+}
+
+.company-logo {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  font-size: 13px;
+}
+
+.job-main {
+  min-width: 0;
+}
+
+.job-main strong {
+  display: block;
+
+  overflow: hidden;
+
+  color: #e4e4e7;
+  font-size: 13px;
+  font-weight: 700;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.job-main span {
+  display: block;
+
+  overflow: hidden;
+  margin-top: 4px;
+
+  color: #71717a;
+  font-size: 11px;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.job-location {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  overflow: hidden;
+
+  color: #777881;
+  font-size: 11px;
+}
+
+.job-location svg {
+  flex-shrink: 0;
+
+  width: 13px;
+  height: 13px;
+
+  fill: none;
+  stroke: #5f6068;
+  stroke-width: 1.6;
+}
+
+.job-location span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* =========================
+   STATUS BADGES
+========================= */
+
+.job-status {
+  width: fit-content;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 5px 8px;
+
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 999px;
+
+  background: rgba(255, 255, 255, 0.025);
+
+  color: #92939c;
+
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.job-status i {
+  width: 5px;
+  height: 5px;
+
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.job-status.applied {
+  color: #60a5fa;
+  background: rgba(96, 165, 250, 0.07);
+  border-color: rgba(96, 165, 250, 0.14);
+}
+
+.job-status.interview {
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.07);
+  border-color: rgba(251, 191, 36, 0.14);
+}
+
+.job-status.rejected {
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.07);
+  border-color: rgba(248, 113, 113, 0.14);
+}
+
+.job-status.offer,
+.job-status.accepted {
+  color: #4ade80;
+  background: rgba(74, 222, 128, 0.07);
+  border-color: rgba(74, 222, 128, 0.14);
+}
+
+.row-arrow {
+  width: 15px;
+  height: 15px;
+
+  fill: none;
+  stroke: #484951;
+  stroke-width: 1.8;
+
+  transition: 0.16s ease;
+}
+
+.job-item:hover .row-arrow,
+.job-item.selected .row-arrow {
+  stroke: #818cf8;
+  transform: translateX(2px);
+}
+
+/* =========================
+   STATES
+========================= */
+
+.jobs-state {
+  min-height: 330px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+}
+
+.jobs-state h3 {
+  margin: 14px 0 5px;
+
+  color: #b8b8c1;
+  font-size: 13px;
+}
+
+.jobs-state p {
+  margin: 0;
+
+  color: #5f6068;
+  font-size: 11px;
+}
+
+.empty-icon {
+  width: 42px;
+  height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+
+  color: #55565f;
+}
+
+.empty-icon svg {
+  width: 19px;
+  height: 19px;
+
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+}
+
+.spinner {
+  width: 23px;
+  height: 23px;
+
+  border: 2px solid rgba(255, 255, 255, 0.07);
+  border-top-color: #818cf8;
+  border-radius: 50%;
+
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* =========================
+   DETAILS
+========================= */
+
+.job-details-card {
+  position: sticky;
+  top: 20px;
+  min-height: 480px;
+}
+
+.details-empty {
+  min-height: 480px;
+  padding: 35px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+}
+
+.details-empty-icon {
+  width: 45px;
+  height: 45px;
+  margin-bottom: 16px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid rgba(129, 140, 248, 0.12);
+  border-radius: 13px;
+
+  background: rgba(129, 140, 248, 0.05);
+  color: #7479b4;
+}
+
+.details-empty-icon svg {
+  width: 19px;
+  height: 19px;
+
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+}
+
+.details-empty h3 {
+  margin: 0;
+
+  color: #c4c4cc;
+  font-size: 13px;
+}
+
+.details-empty p {
+  max-width: 220px;
+  margin: 7px 0 0;
+
+  color: #5f6068;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.details-header {
+  padding: 23px;
+
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.055);
+}
+
+.details-company {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+
+.details-logo {
+  flex-shrink: 0;
+
+  width: 45px;
+  height: 45px;
+
+  border-radius: 11px;
+  font-size: 16px;
+}
+
+.details-company > div:last-child {
+  min-width: 0;
+}
+
+.details-company span {
+  display: block;
+  margin-bottom: 4px;
+
+  color: #55565f;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.details-company h2 {
+  margin: 0;
+
+  color: #f4f4f5;
+  font-size: 18px;
+  font-weight: 750;
+  letter-spacing: -0.025em;
+}
+
+.details-company p {
+  margin: 4px 0 0;
+
+  overflow: hidden;
+
+  color: #777881;
+  font-size: 11px;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.close-details {
+  flex-shrink: 0;
+
+  width: 28px;
+  height: 28px;
+
+  border: 0;
+  border-radius: 7px;
+
+  background: transparent;
+  color: #62636c;
+
+  font-family: inherit;
+  font-size: 19px;
+  line-height: 1;
+
+  cursor: pointer;
+}
+
+.close-details:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #e4e4e7;
+}
+
+.details-body {
+  padding: 0 23px;
+}
+
+.details-status-row {
+  padding: 18px 0;
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.detail-block {
+  padding: 18px 0;
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.detail-block > span {
+  display: block;
+
+  margin-bottom: 8px;
+
+  color: #55565f;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.detail-value {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+
+  color: #b8b8c1;
+  font-size: 12px;
+}
+
+.detail-value svg {
+  width: 14px;
+  height: 14px;
+
+  fill: none;
+  stroke: #71717a;
+  stroke-width: 1.6;
+}
+
+.detail-block .notes {
+  margin: 0;
+
+  color: #85858f;
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+.detail-block code {
+  display: block;
+
+  overflow: hidden;
+
+  color: #62636c;
+  font-family: monospace;
+  font-size: 9px;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.details-footer {
+  padding: 20px 23px;
+
+  display: flex;
+  gap: 8px;
+}
+
+.edit-btn,
+.delete-btn {
+  height: 38px;
+
+  border-radius: 8px;
+
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 700;
+
+  cursor: pointer;
+  transition: 0.16s ease;
+}
+
+.edit-btn {
+  flex: 1;
+
+  border: 1px solid rgba(129, 140, 248, 0.18);
+
+  background: rgba(129, 140, 248, 0.08);
+  color: #a5b4fc;
+}
+
+.edit-btn:hover {
+  background: rgba(129, 140, 248, 0.14);
+}
+
+.delete-btn {
+  padding: 0 14px;
+
+  border: 1px solid rgba(248, 113, 113, 0.13);
+
+  background: rgba(248, 113, 113, 0.05);
+  color: #f87171;
+}
+
+.delete-btn:hover {
+  background: rgba(248, 113, 113, 0.1);
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 1150px) {
+  .jobs-layout {
+    grid-template-columns: minmax(0, 1fr) 330px;
+  }
+
+  .job-item {
+    grid-template-columns:
+      40px
+      minmax(130px, 1.5fr)
+      100px
+      90px
+      15px;
+  }
+}
+
+@media (max-width: 950px) {
+  .jobs-page {
+    padding: 32px 24px 50px;
+  }
+
+  .jobs-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .job-details-card {
+    position: static;
+  }
+}
+
+@media (max-width: 680px) {
+  .jobs-page {
+    padding: 25px 16px 40px;
+  }
+
+  .jobs-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .jobs-total {
+    align-items: flex-start;
+  }
+
+  .jobs-toolbar {
+    flex-direction: column;
+  }
+
+  .status-filter {
+    width: 100%;
+  }
+
+  .job-item {
+    grid-template-columns: 40px minmax(0, 1fr) 18px;
+    gap: 11px;
+  }
+
+  .job-location,
+  .job-status {
+    display: none;
+  }
+
+  .job-main strong {
+    font-size: 12px;
+  }
+
+  .job-main span {
+    font-size: 10px;
+  }
+}/* =========================
+   EDIT MODAL
+========================= */
+
+.edit-modal-overlay {
+  position: fixed;
+  z-index: 100;
+  inset: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px;
+  box-sizing: border-box;
+
+  background: rgba(0, 0, 0, 0.68);
+  backdrop-filter: blur(8px);
+
+  animation: modal-overlay-in 0.18s ease-out;
+}
+
+.edit-modal {
+  width: min(620px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 16px;
+
+  background:
+    radial-gradient(
+      circle at 90% 0%,
+      rgba(129, 140, 248, 0.08),
+      transparent 35%
+    ),
+    #111318;
+
+  box-shadow:
+    0 30px 90px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(255, 255, 255, 0.02);
+
+  animation: modal-in 0.2s ease-out;
+}
+
+.edit-modal-header {
+  padding: 23px 25px;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.edit-modal-header span {
+  display: block;
+  margin-bottom: 5px;
+
+  color: #62636c;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+}
+
+.edit-modal-header h2 {
+  margin: 0;
+
+  color: #f4f4f5;
+  font-size: 20px;
+  letter-spacing: -0.03em;
+}
+
+.edit-modal-close {
+  width: 30px;
+  height: 30px;
+
+  border: 0;
+  border-radius: 8px;
+
+  background: transparent;
+  color: #71717a;
+
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.edit-modal-close:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #f4f4f5;
+}
+
+.edit-form-grid {
+  padding: 24px 25px;
+
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.edit-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.edit-field-full {
+  grid-column: 1 / -1;
+}
+
+.edit-field label {
+  color: #85858f;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.edit-field input,
+.edit-field select,
+.edit-field textarea {
+  width: 100%;
+  box-sizing: border-box;
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 9px;
+  outline: none;
+
+  background: rgba(255, 255, 255, 0.035);
+  color: #e4e4e7;
+
+  font-family: inherit;
+  font-size: 12px;
+
+  transition: 0.18s ease;
+}
+
+.edit-field input,
+.edit-field select {
+  height: 42px;
+  padding: 0 12px;
+}
+
+.edit-field textarea {
+  padding: 11px 12px;
+  resize: vertical;
+  min-height: 100px;
+}
+
+.edit-field input:focus,
+.edit-field select:focus,
+.edit-field textarea:focus {
+  border-color: rgba(129, 140, 248, 0.5);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.edit-field select {
+  appearance: none;
+  cursor: pointer;
+}
+
+.edit-field select option {
+  background: #111318;
+  color: #f4f4f5;
+}
+
+.edit-modal-footer {
+  padding: 17px 25px;
+
+  display: flex;
+  justify-content: flex-end;
+  gap: 9px;
+
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.cancel-edit,
+.save-edit {
+  height: 39px;
+  padding: 0 16px;
+
+  border-radius: 8px;
+
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+
+  cursor: pointer;
+  transition: 0.16s ease;
+}
+
+.cancel-edit {
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: transparent;
+  color: #85858f;
+}
+
+.cancel-edit:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #e4e4e7;
+}
+
+.save-edit {
+  border: 1px solid rgba(129, 140, 248, 0.2);
+  background: rgba(129, 140, 248, 0.14);
+  color: #a5b4fc;
+}
+
+.save-edit:hover:not(:disabled) {
+  background: rgba(129, 140, 248, 0.22);
+}
+
+.save-edit:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+@keyframes modal-overlay-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 600px) {
+  .edit-modal-overlay {
+    padding: 14px;
+  }
+
+  .edit-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .edit-field-full {
+    grid-column: auto;
+  }
+
+  .edit-modal-footer {
+    padding: 15px 20px;
+  }
+}
+
+.delete-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.delete-modal {
+  width: 100%;
+  max-width: 430px;
+  background: #151515;
+  border: 1px solid #2d2d2d;
+  border-radius: 18px;
+  padding: 30px;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.5);
+  text-align: center;
+}
+
+.delete-modal-icon {
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: #ef4444;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.delete-modal h2 {
+  margin: 0 0 12px;
+  color: #fff;
+  font-size: 21px;
+}
+
+.delete-modal p {
+  margin: 0;
+  color: #a1a1aa;
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+.delete-modal p strong {
+  color: #fff;
+}
+
+.delete-warning {
+  margin-top: 8px !important;
+  color: #ef4444 !important;
+  font-size: 13px !important;
+}
+
+.delete-modal-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 26px;
+}
+
+.cancel-delete-btn,
+.confirm-delete-btn {
+  flex: 1;
+  height: 44px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.cancel-delete-btn {
+  background: #222;
+  border: 1px solid #333;
+  color: #ddd;
+}
+
+.cancel-delete-btn:hover {
+  background: #2a2a2a;
+}
+
+.confirm-delete-btn {
+  background: #dc2626;
+  border: 1px solid #dc2626;
+  color: #fff;
+}
+
+.confirm-delete-btn:hover {
+  background: #b91c1c;
+}
+
+.cancel-delete-btn:disabled,
+.confirm-delete-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }

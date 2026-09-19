@@ -3,7 +3,7 @@ import Login from './Login';
 import Register from './Register';
 import './Homepage.css';
 
-function Homepage() {
+function Homepage({ onLogin }) {
   const [showLogin, setShowLogin] = useState(true);
 
   return (
@@ -29,7 +29,7 @@ function Homepage() {
             </button>
           </div>
           <div className="auth-form">
-            {showLogin ? <Login /> : <Register />}
+            {showLogin ? <Login onLogin={onLogin} /> : <Register />}
           </div>
         </section>
       </main>
