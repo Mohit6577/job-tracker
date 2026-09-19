@@ -95,7 +95,7 @@ const loginUser = async (req, res, next) => {
     res.cookie('jwt', refreshToken, {
       httpOnly: true,
       secure: env.NODE_ENV === 'production',
-      sameSite: 'Strict',
+      sameSite: env.NODE_ENV === 'production' ? 'None' : 'Strict',
       maxAge: 24 * 60 * 60 * 1000,
     });
 

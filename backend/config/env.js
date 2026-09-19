@@ -11,6 +11,7 @@ const envSchema = z.object({
     .enum(['development', 'production', 'test'])
     .default('development'),
   PORT: z.coerce.number().min(1000).optional(),
+  CLIENT_URL: z.url().optional(),
 });
 const env = envSchema.parse(process.env);
 
