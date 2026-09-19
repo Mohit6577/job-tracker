@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import Toast from './Toast';
 
+const API_URL = import.meta.env.VITE_API_URL || '';
+
 function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -8,12 +10,22 @@ function Register() {
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState(null);
 
-  async function handleSubmit(e) {
-    e.preventDefault();
+  async function handleSubmit(event) {
+    event.preventDefault();
+
+    const cleanEmail = email.trim();
+
+    if (!cleanEmail || !password || !confirmPassword) {
+      setToast({
+        message: 'All fields are required',
+        type: 'error',
+      });
+      return;
+    }
 
     if (password !== confirmPassword) {
       setToast({
-        message: 'Password does not match',
+        message: 'Passwords do not match',
         type: 'error',
       });
       return;
@@ -22,26 +34,19 @@ function Register() {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/auth/register', {
+      const response = await fetch(`${API_URL}/api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({
-          email: email,
-          password: password,
+          email: cleanEmail,
+          password,
         }),
       });
 
-      const text = await response.text();
-
-      let data;
-
-      try {
-        data = JSON.parse(text);
-      } catch {
-        data = { message: text };
-      }
+      const data = await response.json();
 
       if (!response.ok) {
         setToast({
@@ -55,10 +60,15 @@ function Register() {
         message: data.message || 'Registration successful',
         type: 'success',
       });
+
+      setEmail('');
+      setPassword('');
+      setConfirmPassword('');
     } catch (error) {
-      console.log(error);
+      console.error('Registration error:', error);
+
       setToast({
-        message: 'Something went wrong',
+        message: 'Unable to connect to the server',
         type: 'error',
       });
     } finally {
@@ -84,7 +94,8 @@ function Register() {
           name="email"
           placeholder="Email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(event) => setEmail(event.target.value)}
+          required
         />
 
         <input
@@ -92,7 +103,8 @@ function Register() {
           name="password"
           placeholder="Password"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={(event) => setPassword(event.target.value)}
+          required
         />
 
         <input
@@ -100,7 +112,8 @@ function Register() {
           name="confirmPassword"
           placeholder="Confirm Password"
           value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
+          onChange={(event) => setConfirmPassword(event.target.value)}
+          required
         />
 
         <button type="submit" disabled={loading}>
