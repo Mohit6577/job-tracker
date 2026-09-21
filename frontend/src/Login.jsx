@@ -1,34 +1,41 @@
 import { useState } from 'react';
 import Toast from './Toast';
 
+const API_URL = import.meta.env.VITE_API_URL || '';
+
 function Login({ onLogin }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState(null);
 
-  async function handleSubmit(e) {
-    e.preventDefault();
+  async function handleSubmit(event) {
+    event.preventDefault();
+
+    if (!email.trim() || !password) {
+      setToast({
+        message: 'Email and password are required',
+        type: 'error',
+      });
+      return;
+    }
+
     setLoading(true);
+
     try {
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({
-          email: email,
-          password: password,
+          email: email.trim(),
+          password,
         }),
       });
-      const text = await response.text();
-      let data;
 
-      try {
-        data = JSON.parse(text);
-      } catch {
-        data = { message: text };
-      }
+      const data = await response.json();
 
       if (!response.ok) {
         setToast({
@@ -39,16 +46,18 @@ function Login({ onLogin }) {
       }
 
       localStorage.setItem('token', data.token);
-      onLogin();
 
       setToast({
         message: data.message || 'Login successful',
         type: 'success',
       });
+
+      onLogin();
     } catch (error) {
-      console.log(error);
+      console.error('Login error:', error);
+
       setToast({
-        message: 'Something went wrong',
+        message: 'Unable to connect to the server',
         type: 'error',
       });
     } finally {
@@ -65,14 +74,16 @@ function Login({ onLogin }) {
           onClose={() => setToast(null)}
         />
       )}
+
       <h2>Login</h2>
+
       <form onSubmit={handleSubmit}>
         <input
           type="email"
           name="email"
           placeholder="Email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(event) => setEmail(event.target.value)}
           required
         />
 
@@ -81,9 +92,10 @@ function Login({ onLogin }) {
           name="password"
           placeholder="Password"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={(event) => setPassword(event.target.value)}
           required
         />
+
         <button type="submit" disabled={loading}>
           {loading ? 'Logging in...' : 'Login'}
         </button>
@@ -91,4 +103,5 @@ function Login({ onLogin }) {
     </>
   );
 }
+
 export default Login;
