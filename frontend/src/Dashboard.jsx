@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import apiFetch from './api';
 import './Dashboard.css';
 
@@ -76,7 +77,9 @@ function Dashboard() {
       </section>
 
       <section className="dashboard-empty">
-        <div className="empty-icon">+</div>
+        <Link to="/add-job" className="empty-icon">
+          +
+        </Link>
         <h2>Your job search starts here</h2>
         <p>Add your first application and start tracking your progress.</p>
       </section>
